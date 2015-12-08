@@ -11,6 +11,10 @@ import java.util.Date;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.exif.ExifSubIFDDirectory;
+
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -70,6 +74,11 @@ public class MainController {
 							dateTimeMilis = Files.readAttributes(p, BasicFileAttributes.class).lastModifiedTime()
 									.toMillis();
 							break;
+						case DATE_TAKEN://TODO Secure that only pictures should be done this way
+								Metadata metadata = ImageMetadataReader.readMetadata(p.toFile());
+								ExifSubIFDDirectory directory = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
+								dateTimeMilis = directory.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL).getTime();
+							break;
 						}
 						Date date = new Date(dateTimeMilis);
 						String extendsion = p.toFile().getName().substring(p.toFile().getName().lastIndexOf("."));
@@ -112,6 +121,9 @@ public class MainController {
 				break;
 			case "Last Modified Date":
 				dateType = DateType.MODYFIED_DATE;
+				break;
+			case "Date taken (pic only!)":
+				dateType = DateType.DATE_TAKEN;
 				break;
 			}
 		});
